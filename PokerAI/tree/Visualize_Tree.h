@@ -1,20 +1,20 @@
-################################################################################
-#
-#   Copyright 2022 The DecisionHoldem Authors，namely，Qibin Zhou，
-#   Dongdong Bai，Junge Zhang and Kaiqi Huang. All Rights Reserved.
-#
-#   Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE
-#                 Version 3, 19 November 2007
-#
-#   This program is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#   GNU Affero General Public License for more details.
-#
-#   You should have received a copy of the GNU Affero General Public License 
-#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-################################################################################
+// ################################################################################
+// #
+// #   Copyright 2022 The DecisionHoldem Authors，namely，Qibin Zhou，
+// #   Dongdong Bai，Junge Zhang and Kaiqi Huang. All Rights Reserved.
+// #
+// #   Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE
+// #                 Version 3, 19 November 2007
+// #
+// #   This program is distributed in the hope that it will be useful,
+// #   but WITHOUT ANY WARRANTY; without even the implied warranty of
+// #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// #   GNU Affero General Public License for more details.
+// #
+// #   You should have received a copy of the GNU Affero General Public License 
+// #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// #
+// ################################################################################
 #pragma once
 #include "Node.h"
 #include <string.h>
@@ -66,7 +66,7 @@ void write2dot(strategy_node* tree, FILE* fw, char his[], int cur, char clusters
 						fprintf(fw, "%s [label = \"*\" color = red, style = filled];\n", dest);
 					}
 
-					fprintf(fw, "%s -> %s [label = \"%d||%d\" ];\n", ori, dest, tp, tree->regret[i]);
+					fprintf(fw, "%s -> %s [label = \"%d||%f\" ];\n", ori, dest, tp, tree->regret[i]);
 				}
 				dottimes++;
 				if (dottimes > dotend)
@@ -96,7 +96,7 @@ void write2dot(strategy_node* tree, FILE* fw, char his[], int cur, char clusters
 			strcat(dest, clusters);
 			if (dottimes >= dotstart) {
 				fprintf(fw, "%s [label = \"*\" color = black, style = filled];\n", dest);
-				fprintf(fw, "%s -> %s [label = \"%c|%d\" ];\n", ori, dest, his[cur], tree->regret[i]);
+				fprintf(fw, "%s -> %s [label = \"%c|%f\" ];\n", ori, dest, his[cur], tree->regret[i]);
 			}
 			dottimes++;
 			if (dottimes > dotend)

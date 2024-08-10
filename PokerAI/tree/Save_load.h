@@ -1,20 +1,20 @@
-################################################################################
-#
-#   Copyright 2022 The DecisionHoldem Authors，namely，Qibin Zhou，
-#   Dongdong Bai，Junge Zhang and Kaiqi Huang. All Rights Reserved.
-#
-#   Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE
-#                 Version 3, 19 November 2007
-#
-#   This program is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#   GNU Affero General Public License for more details.
-#
-#   You should have received a copy of the GNU Affero General Public License 
-#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-################################################################################
+// ################################################################################
+// #
+// #   Copyright 2022 The DecisionHoldem Authors，namely，Qibin Zhou，
+// #   Dongdong Bai，Junge Zhang and Kaiqi Huang. All Rights Reserved.
+// #
+// #   Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE
+// #                 Version 3, 19 November 2007
+// #
+// #   This program is distributed in the hope that it will be useful,
+// #   but WITHOUT ANY WARRANTY; without even the implied warranty of
+// #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// #   GNU Affero General Public License for more details.
+// #
+// #   You should have received a copy of the GNU Affero General Public License 
+// #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// #
+// ################################################################################
 #pragma once
 #include "Node.h"
 ofstream fout;
@@ -49,7 +49,7 @@ void dfs_write(strategy_node* privatenode[], int clusterlen) {		//save strategy
 	}
 	else throw exception();
 }
-void dump(strategy_node* root, char filename[]) {
+void dump(strategy_node* root, const char* filename) {
 	fout.open(filename, ios::out | ios::binary);
 	strategy_node* privatenode[169];
 	for (int i = 0; i < 169; i++)
@@ -76,10 +76,10 @@ void bulid_bluestrategy(strategy_node* privatenode[], int clusterlen) {
 		for (int i = 0; i < clusterlen; i++) {
 			privatenode[i]->actionstr = new unsigned char[len];
 			for (int j = 0; j < len; j++)
-				privatenode[i]->actionstr[j] = actionstr[j];
+				privatenode[i]->actionstr[j] = actionstr[j]; //dongju : 파일의 actionstr로 update -> 모든 privatenode를 똑같이??
 			privatenode[i]->init_child(privatenode[i]->actionstr, len);
 			assert(len == privatenode[i]->action_len);
-			fin.read((char*)privatenode[i]->regret, sizeof(double) * len);
+			fin.read((char*)privatenode[i]->regret, sizeof(double) * len); //파일의 regret[9]로 update
 			fin.read((char*)privatenode[i]->averegret, sizeof(double) * len);
 			double sum = 0;
 			for (int k = 0; k < len; k++)
@@ -108,7 +108,7 @@ void bulid_bluestrategy(strategy_node* privatenode[], int clusterlen) {
 	}
 	else throw exception();
 }
-void load(strategy_node* root, char filename[]) {//316174
+void load(strategy_node* root, const char* filename) {//316174
 	fin.open(filename, ios::in | ios::binary);
 	root->init_chance_node(169);
 	strategy_node* privatenode[169];

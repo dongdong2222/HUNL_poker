@@ -1,20 +1,20 @@
-################################################################################
-#
-#   Copyright 2022 The DecisionHoldem Authors，namely，Qibin Zhou，
-#   Dongdong Bai，Junge Zhang and Kaiqi Huang. All Rights Reserved.
-#
-#   Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE
-#                 Version 3, 19 November 2007
-#
-#   This program is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#   GNU Affero General Public License for more details.
-#
-#   You should have received a copy of the GNU Affero General Public License 
-#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-################################################################################
+// ################################################################################
+// #
+// #   Copyright 2022 The DecisionHoldem Authors，namely，Qibin Zhou，
+// #   Dongdong Bai，Junge Zhang and Kaiqi Huang. All Rights Reserved.
+// #
+// #   Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE
+// #                 Version 3, 19 November 2007
+// #
+// #   This program is distributed in the hope that it will be useful,
+// #   but WITHOUT ANY WARRANTY; without even the implied warranty of
+// #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// #   GNU Affero General Public License for more details.
+// #
+// #   You should have received a copy of the GNU Affero General Public License 
+// #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// #
+// ################################################################################
 #pragma once
 #include <algorithm>
 #include <math.h>
@@ -242,10 +242,10 @@ public:
 		assert(betting_stage <= 4);
 	}
 	int legal_actions(unsigned char* actions) {
-		int chips = table.players[player_i_index].n_chips;
+		int chips = table.players[player_i_index].n_chips; //dougju: 플레이어의 남은 칩수
 		assert(table.total_pot == table.total());
-		int n_chips_to_call = last_bigbet - table.players[player_i_index].n_bet_chips();
-		int pot = table.total_pot + n_chips_to_call;
+		int n_chips_to_call = last_bigbet - table.players[player_i_index].n_bet_chips(); //dongju : call을 위해 필요한 칩
+		int pot = table.total_pot + n_chips_to_call; //dongju : pot은 현재 pot에 call을 위해 필요한 칩의 합
 		int cur = 0;
 		if (n_chips_to_call != 0)
 			actions[cur++] = 'd'; //fold

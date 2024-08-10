@@ -1,20 +1,20 @@
-################################################################################
-#
-#   Copyright 2022 The DecisionHoldem Authors，namely，Qibin Zhou，
-#   Dongdong Bai，Junge Zhang and Kaiqi Huang. All Rights Reserved.
-#
-#   Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE
-#                 Version 3, 19 November 2007
-#
-#   This program is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#   GNU Affero General Public License for more details.
-#
-#   You should have received a copy of the GNU Affero General Public License 
-#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-################################################################################
+// ################################################################################
+// #
+// #   Copyright 2022 The DecisionHoldem Authors，namely，Qibin Zhou，
+// #   Dongdong Bai，Junge Zhang and Kaiqi Huang. All Rights Reserved.
+// #
+// #   Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE
+// #                 Version 3, 19 November 2007
+// #
+// #   This program is distributed in the hope that it will be useful,
+// #   but WITHOUT ANY WARRANTY; without even the implied warranty of
+// #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// #   GNU Affero General Public License for more details.
+// #
+// #   You should have received a copy of the GNU Affero General Public License 
+// #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// #
+// ################################################################################
 #pragma once
 #include "BlueprintMCCFR.h"
 #include "util/ThreadPool.h"
@@ -61,7 +61,7 @@ void each_thread(int t) {
 	cout << "iter :" << t << ",each thread time:" << ((end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec)) / 1000000.0 << endl;
 
 }
-void multiprocess_blueprint() {			//program exit
+void multiprocess_blueprint() {			//program exit //dongju: training
 
 	{
 		Player players[] = { Player(20000),Player(20000) };
@@ -100,7 +100,7 @@ void multiprocess_blueprint() {			//program exit
 			else
 				update_strategy(root, true);
 			if (t % multidump_iteration == 0) {
-				dump(root, "cluster/blueprint_strategy.dat");
+				dump(root, "cluster/multi/blueprint_strategy.dat");
 			}
 		}
 	}

@@ -1,24 +1,26 @@
-################################################################################
-#
-#   Copyright 2022 The DecisionHoldem Authors，namely，Qibin Zhou，
-#   Dongdong Bai，Junge Zhang and Kaiqi Huang. All Rights Reserved.
-#
-#   Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE
-#                 Version 3, 19 November 2007
-#
-#   This program is distributed in the hope that it will be useful,
-#   but WITHOUT ANY WARRANTY; without even the implied warranty of
-#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-#   GNU Affero General Public License for more details.
-#
-#   You should have received a copy of the GNU Affero General Public License 
-#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-################################################################################
+// ################################################################################
+// #
+// #   Copyright 2022 The DecisionHoldem Authors，namely，Qibin Zhou，
+// #   Dongdong Bai，Junge Zhang and Kaiqi Huang. All Rights Reserved.
+// #
+// #   Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE
+// #                 Version 3, 19 November 2007
+// #
+// #   This program is distributed in the hope that it will be useful,
+// #   but WITHOUT ANY WARRANTY; without even the implied warranty of
+// #   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// #   GNU Affero General Public License for more details.
+// #
+// #   You should have received a copy of the GNU Affero General Public License 
+// #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+// #
+// ################################################################################
 #include <random>
 #include "Multi_Blureprint.h"
+#include "tree/Visualize_Tree.h"
 
-int main(int argc, char **argv) {			
+int main(int argc, char **argv) {	
+	printf("Hello, world!");		
 	assert(argc == 1);
 	if (argv[0] == 0)
 		multiprocess_blueprint();
@@ -29,7 +31,8 @@ int main(int argc, char **argv) {
 		Pokerstate state(table);
 		state.reset_game();
 		strategy_node* root = new strategy_node();
-		load(root, "cluster/blueprint_strategy.dat");
+		load(root, "cluster/blueprint_stgy-001.dat");
+		visualization(root, "visualize/visualization.dot");
 		state.reset_game(); 
 		check_subgame(root, state);
 		state.reset_game();
