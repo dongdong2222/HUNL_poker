@@ -21,6 +21,9 @@
 using namespace std;
 struct strategy_node {		//info set node 
 	//bool vis;
+	int player_index = 0; //dongju : add player_index for visualize
+	bool is_chance = false;
+
 	int action_len = 0;
 	unsigned char* actionstr ;
 	double* regret;
@@ -29,6 +32,8 @@ struct strategy_node {		//info set node
 	double* averegret;
 	strategy_node* actions ;
 	strategy_node() :action_len(0){}
+
+
 	strategy_node* findnode(unsigned char action) {
 		for (int i = 0; i < action_len; i++) {
 			if (*(actionstr + i) == action)
@@ -43,7 +48,9 @@ struct strategy_node {		//info set node
 		}
 		throw std::exception();
 	}
-	void init_child(unsigned char* action_str, int _action_len) {
+	void init_child(unsigned char* action_str, int _action_len, int _player_index) {
+		player_index = _player_index;
+		is_chance = false;
 		actionstr = action_str;
 		actions = new strategy_node[_action_len]();
 		regret = new double[_action_len] {0};
@@ -53,13 +60,17 @@ struct strategy_node {		//info set node
 		
 	}
 	void init_chance_node(int initlen) {
-
+		is_chance = true;
 		actions = new strategy_node[initlen]();
 		action_len = initlen;
 	}
+
+	// ~strategy_node(){
+	// 	delete[] actionstr;
+	// }
 };
-void calculate_strategy(double* oriregret, int len, double sigma[]) {
-	assert(len != 0);
+void calculate_strategy(double* oriregret, int len, double sigma[]) { //dongju : regret으로 확률값(정책) 구하기
+	assert(len != 0); 
 	int regret[12];
 	for (int i = 0; i < len; i++)
 		regret[i] = oriregret[i];

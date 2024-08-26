@@ -21,8 +21,8 @@
 
 int main(int argc, char **argv) {	
 	printf("Hello, world!");		
-	assert(argc == 1);
-	if (argv[0] == 0)
+	assert(argc == 2);
+	if (*argv[1] == '0')
 		multiprocess_blueprint();
 	else
 	{
@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
 		Pokerstate state(table);
 		state.reset_game();
 		strategy_node* root = new strategy_node();
-		load(root, "cluster/blueprint_stgy-001.dat");
+		load(root, "cluster/blueprint_stgy-002.dat");
 		visualization(root, "visualize/visualization.dot");
 		state.reset_game(); 
 		check_subgame(root, state);

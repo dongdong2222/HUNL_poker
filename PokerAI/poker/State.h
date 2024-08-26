@@ -102,6 +102,7 @@ public:
 	}
 	int is_terminal() {
 		return betting_stage > 3;
+		// return betting_stage > 0;
 	}
 	void compute_payout() {
 		for (int i = 0; i < table.playerlen; i++) {
@@ -227,7 +228,7 @@ public:
 				increment_stage();
 			if (betting_stage != 4)
 				return true;
-			/*****************************************************************************/
+			/*****************************************************************************/ // take action과
 			else
 				compute_payout(winplayer);
 			/*****************************************************************************/
@@ -308,6 +309,12 @@ public:
 				actions[cur++] = 'n'; //allin
 		}
 		return cur;
+	}
+	int custom_legal_actions(unsigned char* actions){
+		actions[0] = 'd';
+		actions[1] = 'l';
+		actions[2] = 'n';
+		return 3;
 	}
 };
 class Searchstate {

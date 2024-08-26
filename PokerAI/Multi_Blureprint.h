@@ -38,13 +38,14 @@ void each_thread(int t) {
 
 	Pokerstate state(table);
 	for (int k = 1; k <= each_thread_iters; k++) {
-		state.reset_game_single();
+		state.reset_game_single(); // dongju : dealing private cards, community cards
 		for (int i = 0; i < n_players; i++) {
-			state.reset_game();
-			pref[0] = root->actions + state.table.players[0].clusters[0];
-			pref[1] = root->actions + state.table.players[1].clusters[0];
+			state.reset_game(); // dongju : reset game with same private cards and community cards
+			//clusters[0] = preflop(0 ~ 168), clusters[1] = flop(0 ~ 49999), clusters[2] = turn(0 ~ 4999), clusters[3] = river(0 ~ 999)
+			pref[0] = root->actions + state.table.players[0].clusters[0]; // player0가 뽑은 카드?
+			pref[1] = root->actions + state.table.players[1].clusters[0]; // player1가 뽑은 카드?
 			if (t > multiprune_threshold) {
-				int dr = rand() % 100;
+				int dr = 1;//rand() % 100;
 				if (dr < 5)
 					blueprint_cfr(pref, state, i, 1);
 				else
@@ -68,7 +69,9 @@ void multiprocess_blueprint() {			//program exit //dongju: training
 		PokerTable table(2, players);
 		Pokerstate state(table);
 		state.reset_game();
-		bulid_preflop(root, state);
+		custom_build_preflop(root, state);
+		// bulid_preflop(root, state);
+		// visualization(root, "visualize/init_gameTree.stgy");
 
 		state.reset_game();
 		check_subgame(root, state);
@@ -86,7 +89,7 @@ void multiprocess_blueprint() {			//program exit //dongju: training
 	threadpool pool(threadnum, &dumpwait);
 	srand(time(0));
 	for (int t = 1; t <= multin_iterations; t++) {
-		std::unique_lock<mutex> lck(mtx);
+		std::unique_lock<mutex> lck(mtx); //dongju : 생성과 동시에 mtx로 lock됨
 		pool.commit(each_thread, t);
 		if (t % multistrategy_interval == 0) {
 			dumpwait.wait(lck);

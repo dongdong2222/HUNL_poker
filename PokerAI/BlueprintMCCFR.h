@@ -31,37 +31,37 @@ double blueprint_cfr(strategy_node* cnode[], Pokerstate& state, int pi, double w
 	int ph = state.player_i_index;
 	assert(cnode[0]->action_len == cnode[1]->action_len);
 	if (state.is_terminal()) {
-		return state.payout(pi);
+		return state.payout(pi);// pi == player index = traveler
 	}
-	else if (ph == pi) {
+	else if (ph == pi) { // 현재 차례가 traveler일때
 		double sigma[12];
 		double vo = 0;
 		calculate_strategy(cnode[ph]->regret, cnode[ph]->action_len, sigma);
-		int len = cnode[0]->action_len;
+		int len = cnode[0]->action_len; //같은 infoset이므로 선택할 수 있는 action의 수도 같다.
 		double voa[12] = { 0 };
 		for (int i = 0; i < len; i++) {
 			Pokerstate st2 = state;
-			bool is_chance = st2.apply_action(cnode[ph]->actionstr[i]);
+			bool is_chance = st2.apply_action(cnode[ph]->actionstr[i]); //ph가 고른데로 선택
 			strategy_node* cnode2[2];
 			cnode2[0] = cnode[0]->actions + i;//cnode[0]->findnode(cnode[0]->actionstr[i]);
 			cnode2[1] = cnode[1]->actions + i;//cnode[1]->findnode(cnode[1]->actionstr[i]);
-			if (is_chance) {
+			if (is_chance) { //chance 라면 베팅라운드에 맞는 deal 진행
 				cnode2[0] = (cnode2[0]->actions + st2.table.players[0].clusters[st2.betting_stage]);
 				cnode2[1] = (cnode2[1]->actions + st2.table.players[1].clusters[st2.betting_stage]);
 			}
-			voa[i] = blueprint_cfr(cnode2, st2, pi, w) * w;
-			vo += sigma[i] * voa[i];
+			voa[i] = blueprint_cfr(cnode2, st2, pi, w) * w; // actions[i]에서 player i가 받을 금액 TODO : w?? 가중치 좀 바꿔야할듯
+			vo += sigma[i] * voa[i]; //금액의 기댓값의 합
 		}
-		for (int i = 0; i < len; i++) {
+		for (int i = 0; i < len; i++) { //regret 업데이트
 			cnode[ph]->regret[i] += voa[i] - vo;
 			assert(cnode[ph]->regret[i] < 200000000);
-			if (cnode[ph]->regret[i] < -210000000)
+			if (cnode[ph]->regret[i] < -210000000) // 0에 -를 더해서 
 				cnode[ph]->regret[i] = -210000000;
 		}
 		assert(w > 0);
 		return vo / w;
 	}
-	else {
+	else { // 현재 차례가 traveler가 아닐때 //regret 업데이트가 없다.
 		double sigma[12];
 		double vo = 0;
 		calculate_strategy(cnode[ph]->regret, cnode[ph]->action_len, sigma);

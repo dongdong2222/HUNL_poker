@@ -152,7 +152,7 @@ void check_saveload(strategy_node* root1, strategy_node* root2, Pokerstate state
 void check_subtree(strategy_node* publicnode[], Pokerstate& state, int len) {
 	if (state.is_terminal())
 		return;
-	if (publicnode[0]->action_len > 100) {
+	if (publicnode[0]->is_chance) {
 		strategy_node** tempprivatenode2 = new strategy_node * [publicnode[0]->action_len];
 		tempprivatenode2[0] = publicnode[0]->actions;
 		for (int j = 0; j < publicnode[0]->action_len; j++)
@@ -259,18 +259,20 @@ void check_addnode(subgame_node* subgameroot) {
 /***************************************************************************************************************************************************************************/
 /***************************************************************************************************************************************************************************/
 void bulid_subtree(strategy_node* privatenode[], Pokerstate& state, int len) {//蓝图策略树构建
+	// if (count >= 5)
+	// 	return;
 	if (state.is_terminal())
 		return;
 	unsigned char* legal_acts = new unsigned char[12];
-	int actionlen = state.legal_actions(legal_acts);
-	privatenode[0]->init_child(legal_acts, actionlen);
+	int actionlen = state.legal_actions(legal_acts); //가능한 action들 "dl12482040n"
+	privatenode[0]->init_child(legal_acts, actionlen, state.player_i_index);
 	//if (state.betting_stage == 0)
 	//	privatenode[0]->averegret = new int[actionlen];
 	for (int i = 1; i < len; i++) {
 		unsigned char* lacts = new unsigned char[actionlen + 1];
 		for (int j = 0; j < actionlen + 1; j++)
 			lacts[j] = legal_acts[j];
-		privatenode[i]->init_child(lacts, actionlen);
+		privatenode[i]->init_child(lacts, actionlen, state.player_i_index);
 		//if (state.betting_stage == 0)
 		//	privatenode[i]->averegret = new int[actionlen];
 	}
@@ -317,6 +319,65 @@ void bulid_preflop(strategy_node* privateroot, Pokerstate state, int len = 169) 
 	bulid_subtree(privatenode, state, len);
 	cout << "infoset node:" << countnode << endl;
 
+}
+
+
+
+void custom_build_subtree(strategy_node* privatenode[], Pokerstate state, int len){
+	if (state.is_terminal())
+		return;
+	unsigned char* legal_acts = new unsigned char[12];
+	int actionlen = state.legal_actions(legal_acts);
+	privatenode[0]->init_child(legal_acts, actionlen, state.player_i_index);
+	// 왜  privatenode[0]과 나머지를 따로 init하지? 다른점은 action_str에 + '\0'
+	for(int i = 1; i< len; i++){
+		unsigned char* lacts = new unsigned char[actionlen + 1]; // + 1 : '\0'
+		for (int j=0; j < actionlen + 1; j++)
+			lacts[j] = legal_acts[j];
+		privatenode[i]->init_child(lacts, actionlen, state.player_i_index);
+		
+	}
+	countnode += actionlen * len;
+
+	strategy_node** tempprivatenode = new strategy_node * [len]; //privatenode
+	for(int i=0; i< actionlen; i++){
+		Pokerstate newstate = state; //Pokerstate dont have pointer value, 임의 게임 돌려볼라구
+		bool is_chance = newstate.take_action(legal_acts[i]); //legal_acts[i]를 실행, 
+		if(is_chance){
+			//일단 chancelen 하나로 통일 , round마다 chance개수 다름
+			int chancelen;
+			if (newstate.betting_stage == 1)
+				chancelen = 50000;
+			else if (newstate.betting_stage == 2)
+				chancelen = 5000;
+			else
+				chancelen = 1000;
+			strategy_node** tempprivatenode2 = new strategy_node *[chancelen]; //next privatenode
+			privatenode[0]->actions[i].init_chance_node(chancelen);
+			for(int j=1; j<len; j++){
+				privatenode[j]->actions[i].action_len = privatenode[0]->actions[i].action_len;
+				privatenode[j]->actions[i].actions = privatenode[0]->actions[i].actions;
+			}
+			for (int j=0; j < chancelen; j++)
+				tempprivatenode2[j] = privatenode[0]->actions[i].actions + j;
+			custom_build_subtree(tempprivatenode2, newstate, chancelen);
+			delete[] tempprivatenode2;
+		}
+		else{
+			for (int j=0; j < len; j++)
+				tempprivatenode[j] = privatenode[j]->actions + i;
+			custom_build_subtree(tempprivatenode, newstate, len);
+		}
+	}
+	delete[] tempprivatenode;
+
+}
+void custom_build_preflop(strategy_node* privateroot, Pokerstate state, int len = 169){
+	privateroot->init_chance_node(len);
+	strategy_node* privatenode[169]; // 포인터 배열
+	for(int i=0; i< len; i++)
+		privatenode[i] = privateroot->actions + i;
+	custom_build_subtree(privatenode, state, len);
 }
 
 void bulid_subtree_turn2(subgame_node* privatenode[], strategy_node* subblueprints[], Searchstate& state, int len, bool offtree, bool existmap) {//构建实时搜索子博弈树turn和river轮

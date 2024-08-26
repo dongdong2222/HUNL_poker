@@ -23,15 +23,16 @@
 map<string, bool> mapp;
 map<string, bool>::iterator it;
 //int dotend = 102000, dotstart=100000, dottimes = 0;
-int dotend = 1000, dotstart = 0, dottimes = 0;
+int dotend = 20000, dotstart = 0, dottimes = 0;
 void write2dot(strategy_node* tree, FILE* fw, char his[], int cur, char clusters[])
 {
-	if (dottimes > dotend)
+	fflush(fw);
+ 	if (dottimes > dotend)
 		return;
-	if (tree->action_len == 0)
+	if (tree->action_len == 0 )
 		return;
 	//tree->vis = true;
-	char ori[115];
+	char ori[200]; //dongju : ori[115] -> ori[200]
 	for (int i = 0; i <= cur; i++)
 		ori[i] = his[i];
 	if (cur != 1)
@@ -52,7 +53,7 @@ void write2dot(strategy_node* tree, FILE* fw, char his[], int cur, char clusters
 					clusters[0] = tp / 10 + '0', clusters[1] = tp % 10 + '0', clusters[2] = '\0';
 				else
 					clusters[0] = tp + '0', clusters[1] = '\0';
-				char dest[150];
+				char dest[200]; //doongju dest[150] -> [200]
 				int p = 0;
 				for (; p < ans; p++)
 					dest[p] = his[p];
@@ -65,13 +66,16 @@ void write2dot(strategy_node* tree, FILE* fw, char his[], int cur, char clusters
 						mapp[nodename] = true;
 						fprintf(fw, "%s [label = \"*\" color = red, style = filled];\n", dest);
 					}
-
-					fprintf(fw, "%s -> %s [label = \"%d||%f\" ];\n", ori, dest, tp, tree->regret[i]);
+					//dongju :
+					if (tree->regret == NULL)
+						fprintf(fw, "%s -> %s [label = \"%d||%f\" ];\n", ori, dest, tp, 0.0);
+					else
+						fprintf(fw, "%s -> %s [label = \"%d||%f\" ];\n", ori, dest, tp, tree->regret[i]);
 				}
 				dottimes++;
 				if (dottimes > dotend)
 					return;
-				if (tree->action_len == 169) {
+				if (tree->action_len == 169 && tree->regret != NULL) {
 					for (int k = 0; k < 169; k++)
 						if (tree->regret[i] < tree->regret[k])
 							i = k;
@@ -86,9 +90,12 @@ void write2dot(strategy_node* tree, FILE* fw, char his[], int cur, char clusters
 	else {
 
 		for (int i = 0; i < tree->action_len; i++) {
-			his[cur] = tree->actionstr[i];
+			if (tree->actionstr[i] <= 80)
+				his[cur] = 'r';//raise
+			else
+				his[cur] = tree->actionstr[i];
 			his[cur + 1] = '\0';
-			char dest[150];
+			char dest[200]; //150
 			int p = 0;
 			for (; p < cur + 1; p++)
 				dest[p] = his[p];
@@ -110,7 +117,7 @@ void write2dot(strategy_node* tree, FILE* fw, char his[], int cur, char clusters
 void visualization(strategy_node* tree, const char* filename)
 {
 	FILE* fw;
-	char his[115] = "T";
+	char his[200] = "T"; //dongju : his[115] -> his[200]
 	char clusters[4];
 	if (NULL == (fw = fopen(filename, "w")))
 	{
@@ -123,6 +130,138 @@ void visualization(strategy_node* tree, const char* filename)
 	fprintf(fw, "}");
 	fclose(fw);
 }
+//-============================================================
+//-============================================================
+void custom_write2dot(strategy_node* tree, FILE* fw, char his[], int cur, char clusters[]){
+	fflush(fw);
+	if(tree->action_len == 0)
+		return;
+	char ori[115];
+	for(int i=0; i<= cur; i++)
+		ori[i] = his[i];
+	// if(cur != 1) //TODO : cur update
+	// 	strcat(ori, clusters);
+	
+	if (tree->is_chance){
+		for (int i=0; i<tree->action_len; i++){
+			//update history
+			his[cur] = 'C';
+			his[cur + 1] = '\0';
+
+			//set clusters
+			int tp = i + 1;
+			if (tp >= 100)
+				clusters[0] = tp / 100 + '0', clusters[1] = (tp / 10) % 10 + '0', clusters[2] = tp % 10 + '0', clusters[3] = '\0';
+			else if (tp >= 10)
+				clusters[0] = tp / 10 + '0', clusters[1] = tp % 10 + '0', clusters[2] = '\0';
+			else
+				clusters[0] = tp + '0', clusters[1] = '\0';
+
+			// update destination
+			char dest[115];
+			int p = 0;
+			for(;p <= cur + 1; p++)
+				dest[p] = his[p];
+			strcat(dest, clusters);
+			p = strlen(dest);
+			//create actions + i node
+			if ((tree->actions + i)->is_chance){
+					fprintf(fw, "%s [label = \"%s\" color = black, style = filled];\n", dest, dest);
+			}
+			else if ((tree->actions + i)->player_index == 0){
+				fprintf(fw, "%s [label = \"%s\" color = blue, style = filled];\n", dest, dest);
+			}
+			else{
+				fprintf(fw, "%s [label = \"%s\" color = red, style = filled];\n", dest, dest);
+			}
+			//connect nodes
+			if (tree->regret == NULL){
+				if (his[cur] <= 80)
+					fprintf(fw, "%s -> %s [label = \"%d||%f\" ];\n", ori, dest, tp, 0.0);
+				else
+					fprintf(fw, "%s -> %s [label = \"%c||%f\" ];\n", ori, dest, tp, 0.0);
+			}
+
+			else{
+				if (his[cur] <= 80)
+					fprintf(fw, "%s -> %s [label = \"%d||%f\" ];\n", ori, dest, tp, tree->regret[i]);
+				else
+					fprintf(fw, "%s -> %s [label = \"%c||%f\" ];\n", ori, dest, tp, tree->regret[i]);
+			}
+			// next write dot
+			char tm[4];
+			strcpy(tm, clusters);
+			custom_write2dot((tree->actions + i), fw, dest, p, tm);
+		}
+	}
+	else if (tree->action_len != 0 || tree->actionstr != NULL){
+		for(int i = 0; i < tree->action_len; i++){
+			//update history
+			int tp = 0;
+			if (tree->actionstr[i] <= 80){
+				tp = (int)tree->actionstr[i];
+				if (tp >= 100)
+					clusters[0] = tp / 100 + '0', clusters[1] = (tp / 10) % 10 + '0', clusters[2] = tp % 10 + '0', clusters[3] = '\0';
+				else if (tp >= 10)
+					clusters[0] = tp / 10 + '0', clusters[1] = tp % 10 + '0', clusters[2] = '\0';
+				else
+					clusters[0] = tp + '0', clusters[1] = '\0';
+			}
+			else{
+				clusters[0] = tree->actionstr[i];
+				clusters[1] = '\0';
+			}
+			strcat(his, clusters);
+			int p = strlen(his);
+
+			//create node
+			if ((tree->actions + i)->is_chance){
+					fprintf(fw, "%s [label = \"%s\" color = black, style = filled];\n", his, his);
+			}
+			else if ((tree->actions + i)->player_index == 0){
+				fprintf(fw, "%s [label = \"%s\" color = blue, style = filled];\n", his, his);
+			}
+			else{
+				fprintf(fw, "%s [label = \"%s\" color = red, style = filled];\n", his, his);
+			}
+			//connect nodes
+			if (tree->regret == NULL){
+				fprintf(fw, "%s -> %s [label = \"%d||%f\" ];\n", ori, his, tp, 0.0);
+			}
+
+			else{
+				fprintf(fw, "%s -> %s [label = \"%d||%f\" ];\n", ori, his, tp, tree->regret[i]);
+			}
+			// next write dot
+			char tm[4];
+			strcpy(tm, clusters);
+			custom_write2dot((tree->actions + i), fw, his, p, tm);
+		}
+	}
+}
+
+
+
+
+void custom_visualization(strategy_node* tree, const char* filename){
+	FILE* fw;
+	char his[115] = "T";
+	char clusters[4] = ""; //c에서 몇 번째인지
+		if (NULL == (fw = fopen(filename, "w")))
+	{
+		printf("open file error");
+		exit(0);
+	}
+	// fprintf(fw, "%c %d\n", (unsigned char)1, (unsigned char)1);
+	fprintf(fw, "digraph\n{\nnode [shape = Mrecord, style = filled, color = black, fontcolor = white];\n");
+	fprintf(fw, "%s [color = black, style = filled];\n", his);
+	custom_write2dot(tree, fw, his, 1, clusters);
+	fprintf(fw, "}");
+	fclose(fw);
+}
+
+
+
 void write2dotpublic(strategy_node* tree, FILE* fw, char his[], int cur, Pokerstate state)
 {
 	if (tree->action_len == 0)

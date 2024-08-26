@@ -59,7 +59,13 @@ void dump(strategy_node* root, const char* filename) {
 }
 ifstream fin;
 int countterminal = 0;
-void bulid_bluestrategy(strategy_node* privatenode[], int clusterlen) {
+void bulid_bluestrategy(strategy_node* privatenode[], int clusterlen, int count=0) {
+	if (count >= 2){
+		for (int i = 0; i < clusterlen; i++)
+			privatenode[i]->action_len = 0;
+		countterminal++;
+		return;
+	}
 	int len;
 	if (fin.eof())
 		return;
@@ -77,20 +83,20 @@ void bulid_bluestrategy(strategy_node* privatenode[], int clusterlen) {
 			privatenode[i]->actionstr = new unsigned char[len];
 			for (int j = 0; j < len; j++)
 				privatenode[i]->actionstr[j] = actionstr[j]; //dongju : 파일의 actionstr로 update -> 모든 privatenode를 똑같이??
-			privatenode[i]->init_child(privatenode[i]->actionstr, len);
+			privatenode[i]->init_child(privatenode[i]->actionstr, len, 0); //0은 임시...고쳐야함
 			assert(len == privatenode[i]->action_len);
 			fin.read((char*)privatenode[i]->regret, sizeof(double) * len); //파일의 regret[9]로 update
 			fin.read((char*)privatenode[i]->averegret, sizeof(double) * len);
 			double sum = 0;
 			for (int k = 0; k < len; k++)
 				sum += privatenode[i]->averegret[k];
-			assert(sum > 0);
+			// assert(sum > 0);
 		}
 		strategy_node** tempprivatenode = new strategy_node * [clusterlen];
 		for (int i = 0; i < len; i++) {
 			for (int j = 0; j < clusterlen; j++)
 				tempprivatenode[j] = privatenode[j]->actions + i;
-			bulid_bluestrategy(tempprivatenode, clusterlen);
+			bulid_bluestrategy(tempprivatenode, clusterlen, count+1);
 		}
 		delete[] tempprivatenode;
 	}
@@ -103,7 +109,7 @@ void bulid_bluestrategy(strategy_node* privatenode[], int clusterlen) {
 		strategy_node** privatenode2 = new strategy_node * [len];
 		for (int j = 0; j < len; j++)
 			privatenode2[j] = privatenode[0]->actions + j;
-		bulid_bluestrategy(privatenode2, len);
+		bulid_bluestrategy(privatenode2, len, count+1);
 		delete[] privatenode2;
 	}
 	else throw exception();
@@ -115,7 +121,7 @@ void load(strategy_node* root, const char* filename) {//316174
 	for (int i = 0; i < 169; i++)
 		privatenode[i] = root->actions + i;
 	countterminal = 0;
-	bulid_bluestrategy(privatenode, 169);
+	bulid_bluestrategy(privatenode, 169, 0);
 	cout << "countterminal:" << countterminal << endl;
 	fin.close();
 }
