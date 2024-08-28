@@ -238,7 +238,7 @@ public:
 	}
 	void increment_stage() {
 		betting_stage++;
-		if (betting_stage == 1)
+		if (betting_stage == 2)
 			betting_stage = 4;
 		if (betting_stage < 4)
 			reset_betting_round_state();
